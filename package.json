@@ -1,0 +1,31 @@
+{
+  "name": "elijahe.github.io",
+  "version": "1.0.0",
+  "description": "Elijah's Hacks",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack-dev-server --progress --colors",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elijahe/elijahe.github.io.git"
+  },
+  "author": "Elijah El-Haddad",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/elijahe/elijahe.github.io/issues"
+  },
+  "homepage": "https://github.com/elijahe/elijahe.github.io#readme",
+  "devDependencies": {
+    "css-loader": "^0.23.1",
+    "style-loader": "^0.13.1",
+    "webpack": "^1.12.14",
+    "webpack-dev-server": "^1.14.1"
+  },
+  "dependencies": {
+    "codemirror": "^5.13.4",
+    "object-assign": "^4.0.1"
+  }
+}
