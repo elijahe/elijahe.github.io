@@ -1,4 +1,3 @@
-require("codemirror/lib/codemirror.css");
 var CodeMirror = require("codemirror");
 require("codemirror/addon/runmode/runmode");
 
