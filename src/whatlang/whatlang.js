@@ -1,10 +1,12 @@
 var CodeMirror = require("codemirror");
-require("codemirror/addon/runmode/runmode");
 
-// TODO: generate languages array by reading CodeMirror directory
-var languages = ["css", "htmlmixed", "javascript"];
-var modes = languages.map(function(language) {
-  return require("codemirror/mode/" + language + "/" + language);
+var LanguageDetector = require("./language_detector");
+
+CodeMirror.modeInfo.forEach(function(modeInfo) {
+  var language = modeInfo.mode;
+  if (language && "null" !== language) {
+    require("codemirror/mode/" + language + "/" + language);
+  }
 });
 
 var objectAssign = require('object-assign');
@@ -17,7 +19,7 @@ function WhatLang(options) {
 objectAssign(WhatLang.prototype, {
   initialize: function() {
     this._editor = CodeMirror(this.containerNode, {
-      value: "var CodeMirror = true;",
+      value: "var test = true;",
       mode: "javascript"
     });
 
@@ -31,24 +33,9 @@ objectAssign(WhatLang.prototype, {
   },
   detectMode: function() {
     var valueString = this._editor.getValue();
-    var numberOfErrors = [];
+    var sortedPossibleLanguages = LanguageDetector.getSortedPossibleLanguagesArray(valueString);
 
-    languages.forEach(function(language, languageIndex) {
-      var errorCounter = {
-        language: language,
-        numberOfErrors: 0
-      };
-
-      CodeMirror.runMode(valueString, language, function(currentString, style){
-        if (style && -1 !== style.indexOf("error")) {
-          errorCounter.numberOfErrors++;
-        }
-        console.log("language=", language, "currentString", currentString, " style=", style);
-      }.bind(this));
-
-      numberOfErrors[languageIndex] = errorCounter;
-      console.log("language", errorCounter);
-    }, this)
+    console.log(sortedPossibleLanguages);
 
     this._detectModeTimeout = null;
   }

@@ -34,7 +34,7 @@
 /******/ 	__webpack_require__.c = installedModules;
 
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
+/******/ 	__webpack_require__.p = "C:\\Users\\Elijah\\Documents\\GitHub\\elijahe.github.io";
 
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -58,15 +58,17 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var CodeMirror = __webpack_require__(2);
-	__webpack_require__(3);
 
-	// TODO: generate languages array by reading CodeMirror directory
-	var languages = ["css", "htmlmixed", "javascript"];
-	var modes = languages.map(function(language) {
-	  return __webpack_require__(4)("./" + language + "/" + language);
+	var LanguageDetector = __webpack_require__(132);
+
+	CodeMirror.modeInfo.forEach(function(modeInfo) {
+	  var language = modeInfo.mode;
+	  if (language && "null" !== language) {
+	    __webpack_require__(6)("./" + language + "/" + language);
+	  }
 	});
 
-	var objectAssign = __webpack_require__(131);
+	var objectAssign = __webpack_require__(4);
 
 	function WhatLang(options) {
 	  this.containerNode = options.containerNode;
@@ -76,7 +78,7 @@
 	objectAssign(WhatLang.prototype, {
 	  initialize: function() {
 	    this._editor = CodeMirror(this.containerNode, {
-	      value: "var CodeMirror = true;",
+	      value: "var test = true;",
 	      mode: "javascript"
 	    });
 
@@ -90,24 +92,9 @@
 	  },
 	  detectMode: function() {
 	    var valueString = this._editor.getValue();
-	    var numberOfErrors = [];
+	    var sortedPossibleLanguages = LanguageDetector.getSortedPossibleLanguagesArray(valueString);
 
-	    languages.forEach(function(language, languageIndex) {
-	      var errorCounter = {
-	        language: language,
-	        numberOfErrors: 0
-	      };
-
-	      CodeMirror.runMode(valueString, language, function(currentString, style){
-	        if (style && -1 !== style.indexOf("error")) {
-	          errorCounter.numberOfErrors++;
-	        }
-	        console.log("language=", language, "currentString", currentString, " style=", style);
-	      }.bind(this));
-
-	      numberOfErrors[languageIndex] = errorCounter;
-	      console.log("language", errorCounter);
-	    }, this)
+	    console.log(sortedPossibleLanguages);
 
 	    this._detectModeTimeout = null;
 	  }
@@ -9097,243 +9084,497 @@
 
 /***/ },
 /* 4 */
+/***/ function(module, exports) {
+
+	/* eslint-disable no-unused-vars */
+	'use strict';
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+	function toObject(val) {
+		if (val === null || val === undefined) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+
+		return Object(val);
+	}
+
+	module.exports = Object.assign || function (target, source) {
+		var from;
+		var to = toObject(target);
+		var symbols;
+
+		for (var s = 1; s < arguments.length; s++) {
+			from = Object(arguments[s]);
+
+			for (var key in from) {
+				if (hasOwnProperty.call(from, key)) {
+					to[key] = from[key];
+				}
+			}
+
+			if (Object.getOwnPropertySymbols) {
+				symbols = Object.getOwnPropertySymbols(from);
+				for (var i = 0; i < symbols.length; i++) {
+					if (propIsEnumerable.call(from, symbols[i])) {
+						to[symbols[i]] = from[symbols[i]];
+					}
+				}
+			}
+		}
+
+		return to;
+	};
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// CodeMirror, copyright (c) by Marijn Haverbeke and others
+	// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+	(function(mod) {
+	  if (true) // CommonJS
+	    mod(__webpack_require__(2));
+	  else if (typeof define == "function" && define.amd) // AMD
+	    define(["../lib/codemirror"], mod);
+	  else // Plain browser env
+	    mod(CodeMirror);
+	})(function(CodeMirror) {
+	  "use strict";
+
+	  CodeMirror.modeInfo = [
+	    {name: "APL", mime: "text/apl", mode: "apl", ext: ["dyalog", "apl"]},
+	    {name: "PGP", mimes: ["application/pgp", "application/pgp-keys", "application/pgp-signature"], mode: "asciiarmor", ext: ["pgp"]},
+	    {name: "ASN.1", mime: "text/x-ttcn-asn", mode: "asn.1", ext: ["asn", "asn1"]},
+	    {name: "Asterisk", mime: "text/x-asterisk", mode: "asterisk", file: /^extensions\.conf$/i},
+	    {name: "Brainfuck", mime: "text/x-brainfuck", mode: "brainfuck", ext: ["b", "bf"]},
+	    {name: "C", mime: "text/x-csrc", mode: "clike", ext: ["c", "h"]},
+	    {name: "C++", mime: "text/x-c++src", mode: "clike", ext: ["cpp", "c++", "cc", "cxx", "hpp", "h++", "hh", "hxx"], alias: ["cpp"]},
+	    {name: "Cobol", mime: "text/x-cobol", mode: "cobol", ext: ["cob", "cpy"]},
+	    {name: "C#", mime: "text/x-csharp", mode: "clike", ext: ["cs"], alias: ["csharp"]},
+	    {name: "Clojure", mime: "text/x-clojure", mode: "clojure", ext: ["clj", "cljc", "cljx"]},
+	    {name: "ClojureScript", mime: "text/x-clojurescript", mode: "clojure", ext: ["cljs"]},
+	    {name: "Closure Stylesheets (GSS)", mime: "text/x-gss", mode: "css", ext: ["gss"]},
+	    {name: "CMake", mime: "text/x-cmake", mode: "cmake", ext: ["cmake", "cmake.in"], file: /^CMakeLists.txt$/},
+	    {name: "CoffeeScript", mime: "text/x-coffeescript", mode: "coffeescript", ext: ["coffee"], alias: ["coffee", "coffee-script"]},
+	    {name: "Common Lisp", mime: "text/x-common-lisp", mode: "commonlisp", ext: ["cl", "lisp", "el"], alias: ["lisp"]},
+	    {name: "Cypher", mime: "application/x-cypher-query", mode: "cypher", ext: ["cyp", "cypher"]},
+	    {name: "Cython", mime: "text/x-cython", mode: "python", ext: ["pyx", "pxd", "pxi"]},
+	    {name: "Crystal", mime: "text/x-crystal", mode: "crystal", ext: ["cr"]},
+	    {name: "CSS", mime: "text/css", mode: "css", ext: ["css"]},
+	    {name: "CQL", mime: "text/x-cassandra", mode: "sql", ext: ["cql"]},
+	    {name: "D", mime: "text/x-d", mode: "d", ext: ["d"]},
+	    {name: "Dart", mimes: ["application/dart", "text/x-dart"], mode: "dart", ext: ["dart"]},
+	    {name: "diff", mime: "text/x-diff", mode: "diff", ext: ["diff", "patch"]},
+	    {name: "Django", mime: "text/x-django", mode: "django"},
+	    {name: "Dockerfile", mime: "text/x-dockerfile", mode: "dockerfile", file: /^Dockerfile$/},
+	    {name: "DTD", mime: "application/xml-dtd", mode: "dtd", ext: ["dtd"]},
+	    {name: "Dylan", mime: "text/x-dylan", mode: "dylan", ext: ["dylan", "dyl", "intr"]},
+	    {name: "EBNF", mime: "text/x-ebnf", mode: "ebnf"},
+	    {name: "ECL", mime: "text/x-ecl", mode: "ecl", ext: ["ecl"]},
+	    {name: "edn", mime: "application/edn", mode: "clojure", ext: ["edn"]},
+	    {name: "Eiffel", mime: "text/x-eiffel", mode: "eiffel", ext: ["e"]},
+	    {name: "Elm", mime: "text/x-elm", mode: "elm", ext: ["elm"]},
+	    {name: "Embedded Javascript", mime: "application/x-ejs", mode: "htmlembedded", ext: ["ejs"]},
+	    {name: "Embedded Ruby", mime: "application/x-erb", mode: "htmlembedded", ext: ["erb"]},
+	    {name: "Erlang", mime: "text/x-erlang", mode: "erlang", ext: ["erl"]},
+	    {name: "Factor", mime: "text/x-factor", mode: "factor", ext: ["factor"]},
+	    {name: "FCL", mime: "text/x-fcl", mode: "fcl"},
+	    {name: "Forth", mime: "text/x-forth", mode: "forth", ext: ["forth", "fth", "4th"]},
+	    {name: "Fortran", mime: "text/x-fortran", mode: "fortran", ext: ["f", "for", "f77", "f90"]},
+	    {name: "F#", mime: "text/x-fsharp", mode: "mllike", ext: ["fs"], alias: ["fsharp"]},
+	    {name: "Gas", mime: "text/x-gas", mode: "gas", ext: ["s"]},
+	    {name: "Gherkin", mime: "text/x-feature", mode: "gherkin", ext: ["feature"]},
+	    {name: "GitHub Flavored Markdown", mime: "text/x-gfm", mode: "gfm", file: /^(readme|contributing|history).md$/i},
+	    {name: "Go", mime: "text/x-go", mode: "go", ext: ["go"]},
+	    {name: "Groovy", mime: "text/x-groovy", mode: "groovy", ext: ["groovy", "gradle"]},
+	    {name: "HAML", mime: "text/x-haml", mode: "haml", ext: ["haml"]},
+	    {name: "Haskell", mime: "text/x-haskell", mode: "haskell", ext: ["hs"]},
+	    {name: "Haskell (Literate)", mime: "text/x-literate-haskell", mode: "haskell-literate", ext: ["lhs"]},
+	    {name: "Haxe", mime: "text/x-haxe", mode: "haxe", ext: ["hx"]},
+	    {name: "HXML", mime: "text/x-hxml", mode: "haxe", ext: ["hxml"]},
+	    {name: "ASP.NET", mime: "application/x-aspx", mode: "htmlembedded", ext: ["aspx"], alias: ["asp", "aspx"]},
+	    {name: "HTML", mime: "text/html", mode: "htmlmixed", ext: ["html", "htm"], alias: ["xhtml"]},
+	    {name: "HTTP", mime: "message/http", mode: "http"},
+	    {name: "IDL", mime: "text/x-idl", mode: "idl", ext: ["pro"]},
+	    {name: "Jade", mime: "text/x-jade", mode: "jade", ext: ["jade"]},
+	    {name: "Java", mime: "text/x-java", mode: "clike", ext: ["java"]},
+	    {name: "Java Server Pages", mime: "application/x-jsp", mode: "htmlembedded", ext: ["jsp"], alias: ["jsp"]},
+	    {name: "JavaScript", mimes: ["text/javascript", "text/ecmascript", "application/javascript", "application/x-javascript", "application/ecmascript"],
+	     mode: "javascript", ext: ["js"], alias: ["ecmascript", "js", "node"]},
+	    {name: "JSON", mimes: ["application/json", "application/x-json"], mode: "javascript", ext: ["json", "map"], alias: ["json5"]},
+	    {name: "JSON-LD", mime: "application/ld+json", mode: "javascript", ext: ["jsonld"], alias: ["jsonld"]},
+	    {name: "JSX", mime: "text/jsx", mode: "jsx", ext: ["jsx"]},
+	    {name: "Jinja2", mime: "null", mode: "jinja2"},
+	    {name: "Julia", mime: "text/x-julia", mode: "julia", ext: ["jl"]},
+	    {name: "Kotlin", mime: "text/x-kotlin", mode: "clike", ext: ["kt"]},
+	    {name: "LESS", mime: "text/x-less", mode: "css", ext: ["less"]},
+	    {name: "LiveScript", mime: "text/x-livescript", mode: "livescript", ext: ["ls"], alias: ["ls"]},
+	    {name: "Lua", mime: "text/x-lua", mode: "lua", ext: ["lua"]},
+	    {name: "Markdown", mime: "text/x-markdown", mode: "markdown", ext: ["markdown", "md", "mkd"]},
+	    {name: "mIRC", mime: "text/mirc", mode: "mirc"},
+	    {name: "MariaDB SQL", mime: "text/x-mariadb", mode: "sql"},
+	    {name: "Mathematica", mime: "text/x-mathematica", mode: "mathematica", ext: ["m", "nb"]},
+	    {name: "Modelica", mime: "text/x-modelica", mode: "modelica", ext: ["mo"]},
+	    {name: "MUMPS", mime: "text/x-mumps", mode: "mumps", ext: ["mps"]},
+	    {name: "MS SQL", mime: "text/x-mssql", mode: "sql"},
+	    {name: "MySQL", mime: "text/x-mysql", mode: "sql"},
+	    {name: "Nginx", mime: "text/x-nginx-conf", mode: "nginx", file: /nginx.*\.conf$/i},
+	    {name: "NSIS", mime: "text/x-nsis", mode: "nsis", ext: ["nsh", "nsi"]},
+	    {name: "NTriples", mime: "text/n-triples", mode: "ntriples", ext: ["nt"]},
+	    {name: "Objective C", mime: "text/x-objectivec", mode: "clike", ext: ["m", "mm"]},
+	    {name: "OCaml", mime: "text/x-ocaml", mode: "mllike", ext: ["ml", "mli", "mll", "mly"]},
+	    {name: "Octave", mime: "text/x-octave", mode: "octave", ext: ["m"]},
+	    {name: "Oz", mime: "text/x-oz", mode: "oz", ext: ["oz"]},
+	    {name: "Pascal", mime: "text/x-pascal", mode: "pascal", ext: ["p", "pas"]},
+	    {name: "PEG.js", mime: "null", mode: "pegjs", ext: ["jsonld"]},
+	    {name: "Perl", mime: "text/x-perl", mode: "perl", ext: ["pl", "pm"]},
+	    {name: "PHP", mime: "application/x-httpd-php", mode: "php", ext: ["php", "php3", "php4", "php5", "phtml"]},
+	    {name: "Pig", mime: "text/x-pig", mode: "pig", ext: ["pig"]},
+	    {name: "Plain Text", mime: "text/plain", mode: "null", ext: ["txt", "text", "conf", "def", "list", "log"]},
+	    {name: "PLSQL", mime: "text/x-plsql", mode: "sql", ext: ["pls"]},
+	    {name: "Properties files", mime: "text/x-properties", mode: "properties", ext: ["properties", "ini", "in"], alias: ["ini", "properties"]},
+	    {name: "ProtoBuf", mime: "text/x-protobuf", mode: "protobuf", ext: ["proto"]},
+	    {name: "Python", mime: "text/x-python", mode: "python", ext: ["py", "pyw"]},
+	    {name: "Puppet", mime: "text/x-puppet", mode: "puppet", ext: ["pp"]},
+	    {name: "Q", mime: "text/x-q", mode: "q", ext: ["q"]},
+	    {name: "R", mime: "text/x-rsrc", mode: "r", ext: ["r"], alias: ["rscript"]},
+	    {name: "reStructuredText", mime: "text/x-rst", mode: "rst", ext: ["rst"], alias: ["rst"]},
+	    {name: "RPM Changes", mime: "text/x-rpm-changes", mode: "rpm"},
+	    {name: "RPM Spec", mime: "text/x-rpm-spec", mode: "rpm", ext: ["spec"]},
+	    {name: "Ruby", mime: "text/x-ruby", mode: "ruby", ext: ["rb"], alias: ["jruby", "macruby", "rake", "rb", "rbx"]},
+	    {name: "Rust", mime: "text/x-rustsrc", mode: "rust", ext: ["rs"]},
+	    {name: "Sass", mime: "text/x-sass", mode: "sass", ext: ["sass"]},
+	    {name: "Scala", mime: "text/x-scala", mode: "clike", ext: ["scala"]},
+	    {name: "Scheme", mime: "text/x-scheme", mode: "scheme", ext: ["scm", "ss"]},
+	    {name: "SCSS", mime: "text/x-scss", mode: "css", ext: ["scss"]},
+	    {name: "Shell", mime: "text/x-sh", mode: "shell", ext: ["sh", "ksh", "bash"], alias: ["bash", "sh", "zsh"], file: /^PKGBUILD$/},
+	    {name: "Sieve", mime: "application/sieve", mode: "sieve", ext: ["siv", "sieve"]},
+	    {name: "Slim", mimes: ["text/x-slim", "application/x-slim"], mode: "slim", ext: ["slim"]},
+	    {name: "Smalltalk", mime: "text/x-stsrc", mode: "smalltalk", ext: ["st"]},
+	    {name: "Smarty", mime: "text/x-smarty", mode: "smarty", ext: ["tpl"]},
+	    {name: "Solr", mime: "text/x-solr", mode: "solr"},
+	    {name: "Soy", mime: "text/x-soy", mode: "soy", ext: ["soy"], alias: ["closure template"]},
+	    {name: "SPARQL", mime: "application/sparql-query", mode: "sparql", ext: ["rq", "sparql"], alias: ["sparul"]},
+	    {name: "Spreadsheet", mime: "text/x-spreadsheet", mode: "spreadsheet", alias: ["excel", "formula"]},
+	    {name: "SQL", mime: "text/x-sql", mode: "sql", ext: ["sql"]},
+	    {name: "Squirrel", mime: "text/x-squirrel", mode: "clike", ext: ["nut"]},
+	    {name: "Swift", mime: "text/x-swift", mode: "swift", ext: ["swift"]},
+	    {name: "sTeX", mime: "text/x-stex", mode: "stex"},
+	    {name: "LaTeX", mime: "text/x-latex", mode: "stex", ext: ["text", "ltx"], alias: ["tex"]},
+	    {name: "SystemVerilog", mime: "text/x-systemverilog", mode: "verilog", ext: ["v"]},
+	    {name: "Tcl", mime: "text/x-tcl", mode: "tcl", ext: ["tcl"]},
+	    {name: "Textile", mime: "text/x-textile", mode: "textile", ext: ["textile"]},
+	    {name: "TiddlyWiki ", mime: "text/x-tiddlywiki", mode: "tiddlywiki"},
+	    {name: "Tiki wiki", mime: "text/tiki", mode: "tiki"},
+	    {name: "TOML", mime: "text/x-toml", mode: "toml", ext: ["toml"]},
+	    {name: "Tornado", mime: "text/x-tornado", mode: "tornado"},
+	    {name: "troff", mime: "text/troff", mode: "troff", ext: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]},
+	    {name: "TTCN", mime: "text/x-ttcn", mode: "ttcn", ext: ["ttcn", "ttcn3", "ttcnpp"]},
+	    {name: "TTCN_CFG", mime: "text/x-ttcn-cfg", mode: "ttcn-cfg", ext: ["cfg"]},
+	    {name: "Turtle", mime: "text/turtle", mode: "turtle", ext: ["ttl"]},
+	    {name: "TypeScript", mime: "application/typescript", mode: "javascript", ext: ["ts"], alias: ["ts"]},
+	    {name: "Twig", mime: "text/x-twig", mode: "twig"},
+	    {name: "VB.NET", mime: "text/x-vb", mode: "vb", ext: ["vb"]},
+	    {name: "VBScript", mime: "text/vbscript", mode: "vbscript", ext: ["vbs"]},
+	    {name: "Velocity", mime: "text/velocity", mode: "velocity", ext: ["vtl"]},
+	    {name: "Verilog", mime: "text/x-verilog", mode: "verilog", ext: ["v"]},
+	    {name: "VHDL", mime: "text/x-vhdl", mode: "vhdl", ext: ["vhd", "vhdl"]},
+	    {name: "XML", mimes: ["application/xml", "text/xml"], mode: "xml", ext: ["xml", "xsl", "xsd"], alias: ["rss", "wsdl", "xsd"]},
+	    {name: "XQuery", mime: "application/xquery", mode: "xquery", ext: ["xy", "xquery"]},
+	    {name: "YAML", mime: "text/x-yaml", mode: "yaml", ext: ["yaml", "yml"], alias: ["yml"]},
+	    {name: "Z80", mime: "text/x-z80", mode: "z80", ext: ["z80"]},
+	    {name: "mscgen", mime: "text/x-mscgen", mode: "mscgen", ext: ["mscgen", "mscin", "msc"]},
+	    {name: "xu", mime: "text/x-xu", mode: "mscgen", ext: ["xu"]},
+	    {name: "msgenny", mime: "text/x-msgenny", mode: "mscgen", ext: ["msgenny"]}
+	  ];
+	  // Ensure all modes have a mime property for backwards compatibility
+	  for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
+	    var info = CodeMirror.modeInfo[i];
+	    if (info.mimes) info.mime = info.mimes[0];
+	  }
+
+	  CodeMirror.findModeByMIME = function(mime) {
+	    mime = mime.toLowerCase();
+	    for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
+	      var info = CodeMirror.modeInfo[i];
+	      if (info.mime == mime) return info;
+	      if (info.mimes) for (var j = 0; j < info.mimes.length; j++)
+	        if (info.mimes[j] == mime) return info;
+	    }
+	  };
+
+	  CodeMirror.findModeByExtension = function(ext) {
+	    for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
+	      var info = CodeMirror.modeInfo[i];
+	      if (info.ext) for (var j = 0; j < info.ext.length; j++)
+	        if (info.ext[j] == ext) return info;
+	    }
+	  };
+
+	  CodeMirror.findModeByFileName = function(filename) {
+	    for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
+	      var info = CodeMirror.modeInfo[i];
+	      if (info.file && info.file.test(filename)) return info;
+	    }
+	    var dot = filename.lastIndexOf(".");
+	    var ext = dot > -1 && filename.substring(dot + 1, filename.length);
+	    if (ext) return CodeMirror.findModeByExtension(ext);
+	  };
+
+	  CodeMirror.findModeByName = function(name) {
+	    name = name.toLowerCase();
+	    for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
+	      var info = CodeMirror.modeInfo[i];
+	      if (info.name.toLowerCase() == name) return info;
+	      if (info.alias) for (var j = 0; j < info.alias.length; j++)
+	        if (info.alias[j].toLowerCase() == name) return info;
+	    }
+	  };
+	});
+
+
+/***/ },
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var map = {
-		"./apl/apl": 5,
-		"./apl/apl.js": 5,
-		"./asciiarmor/asciiarmor": 6,
-		"./asciiarmor/asciiarmor.js": 6,
-		"./asn.1/asn.1": 7,
-		"./asn.1/asn.1.js": 7,
-		"./asterisk/asterisk": 8,
-		"./asterisk/asterisk.js": 8,
-		"./brainfuck/brainfuck": 9,
-		"./brainfuck/brainfuck.js": 9,
-		"./clike/clike": 10,
-		"./clike/clike.js": 10,
-		"./clojure/clojure": 11,
-		"./clojure/clojure.js": 11,
-		"./cmake/cmake": 12,
-		"./cmake/cmake.js": 12,
-		"./cobol/cobol": 13,
-		"./cobol/cobol.js": 13,
-		"./coffeescript/coffeescript": 14,
-		"./coffeescript/coffeescript.js": 14,
-		"./commonlisp/commonlisp": 15,
-		"./commonlisp/commonlisp.js": 15,
-		"./crystal/crystal": 16,
-		"./crystal/crystal.js": 16,
-		"./css/css": 17,
-		"./css/css.js": 17,
-		"./cypher/cypher": 18,
-		"./cypher/cypher.js": 18,
-		"./d/d": 19,
-		"./d/d.js": 19,
-		"./dart/dart": 20,
-		"./dart/dart.js": 20,
-		"./diff/diff": 21,
-		"./diff/diff.js": 21,
-		"./django/django": 22,
-		"./django/django.js": 22,
-		"./dockerfile/dockerfile": 27,
-		"./dockerfile/dockerfile.js": 27,
-		"./dtd/dtd": 29,
-		"./dtd/dtd.js": 29,
-		"./dylan/dylan": 30,
-		"./dylan/dylan.js": 30,
-		"./ebnf/ebnf": 31,
-		"./ebnf/ebnf.js": 31,
-		"./ecl/ecl": 32,
-		"./ecl/ecl.js": 32,
-		"./eiffel/eiffel": 33,
-		"./eiffel/eiffel.js": 33,
-		"./elm/elm": 34,
-		"./elm/elm.js": 34,
-		"./erlang/erlang": 35,
-		"./erlang/erlang.js": 35,
-		"./factor/factor": 36,
-		"./factor/factor.js": 36,
-		"./fcl/fcl": 37,
-		"./fcl/fcl.js": 37,
-		"./forth/forth": 38,
-		"./forth/forth.js": 38,
-		"./fortran/fortran": 39,
-		"./fortran/fortran.js": 39,
-		"./gas/gas": 40,
-		"./gas/gas.js": 40,
-		"./gfm/gfm": 41,
-		"./gfm/gfm.js": 41,
-		"./gherkin/gherkin": 44,
-		"./gherkin/gherkin.js": 44,
-		"./go/go": 45,
-		"./go/go.js": 45,
-		"./groovy/groovy": 46,
-		"./groovy/groovy.js": 46,
-		"./haml/haml": 47,
-		"./haml/haml.js": 47,
-		"./handlebars/handlebars": 49,
-		"./handlebars/handlebars.js": 49,
-		"./haskell-literate/haskell-literate": 51,
-		"./haskell-literate/haskell-literate.js": 51,
-		"./haskell/haskell": 52,
-		"./haskell/haskell.js": 52,
-		"./haxe/haxe": 53,
-		"./haxe/haxe.js": 53,
-		"./htmlembedded/htmlembedded": 54,
-		"./htmlembedded/htmlembedded.js": 54,
-		"./htmlmixed/htmlmixed": 23,
-		"./htmlmixed/htmlmixed.js": 23,
-		"./http/http": 55,
-		"./http/http.js": 55,
-		"./idl/idl": 56,
-		"./idl/idl.js": 56,
-		"./jade/jade": 57,
-		"./jade/jade.js": 57,
-		"./javascript/javascript": 25,
-		"./javascript/javascript.js": 25,
-		"./jinja2/jinja2": 58,
-		"./jinja2/jinja2.js": 58,
-		"./jsx/jsx": 59,
-		"./jsx/jsx.js": 59,
-		"./julia/julia": 60,
-		"./julia/julia.js": 60,
-		"./livescript/livescript": 61,
-		"./livescript/livescript.js": 61,
-		"./lua/lua": 62,
-		"./lua/lua.js": 62,
-		"./markdown/markdown": 42,
-		"./markdown/markdown.js": 42,
-		"./mathematica/mathematica": 63,
-		"./mathematica/mathematica.js": 63,
-		"./meta": 43,
-		"./meta.js": 43,
-		"./mirc/mirc": 64,
-		"./mirc/mirc.js": 64,
-		"./mllike/mllike": 65,
-		"./mllike/mllike.js": 65,
-		"./modelica/modelica": 66,
-		"./modelica/modelica.js": 66,
-		"./mscgen/mscgen": 67,
-		"./mscgen/mscgen.js": 67,
-		"./mumps/mumps": 68,
-		"./mumps/mumps.js": 68,
-		"./nginx/nginx": 69,
-		"./nginx/nginx.js": 69,
-		"./nsis/nsis": 70,
-		"./nsis/nsis.js": 70,
-		"./ntriples/ntriples": 71,
-		"./ntriples/ntriples.js": 71,
-		"./octave/octave": 72,
-		"./octave/octave.js": 72,
-		"./oz/oz": 73,
-		"./oz/oz.js": 73,
-		"./pascal/pascal": 74,
-		"./pascal/pascal.js": 74,
-		"./pegjs/pegjs": 75,
-		"./pegjs/pegjs.js": 75,
-		"./perl/perl": 76,
-		"./perl/perl.js": 76,
-		"./php/php": 77,
-		"./php/php.js": 77,
-		"./pig/pig": 78,
-		"./pig/pig.js": 78,
-		"./properties/properties": 79,
-		"./properties/properties.js": 79,
-		"./protobuf/protobuf": 80,
-		"./protobuf/protobuf.js": 80,
-		"./puppet/puppet": 81,
-		"./puppet/puppet.js": 81,
-		"./python/python": 82,
-		"./python/python.js": 82,
-		"./q/q": 83,
-		"./q/q.js": 83,
-		"./r/r": 84,
-		"./r/r.js": 84,
-		"./rpm/rpm": 86,
-		"./rpm/rpm.js": 86,
-		"./rst/rst": 87,
-		"./rst/rst.js": 87,
-		"./ruby/ruby": 48,
-		"./ruby/ruby.js": 48,
-		"./rust/rust": 89,
-		"./rust/rust.js": 89,
-		"./sass/sass": 90,
-		"./sass/sass.js": 90,
-		"./scheme/scheme": 91,
-		"./scheme/scheme.js": 91,
-		"./shell/shell": 92,
-		"./shell/shell.js": 92,
-		"./sieve/sieve": 93,
-		"./sieve/sieve.js": 93,
-		"./slim/slim": 94,
-		"./slim/slim.js": 94,
-		"./smalltalk/smalltalk": 95,
-		"./smalltalk/smalltalk.js": 95,
-		"./smarty/smarty": 96,
-		"./smarty/smarty.js": 96,
-		"./solr/solr": 97,
-		"./solr/solr.js": 97,
-		"./soy/soy": 98,
-		"./soy/soy.js": 98,
-		"./sparql/sparql": 99,
-		"./sparql/sparql.js": 99,
-		"./spreadsheet/spreadsheet": 100,
-		"./spreadsheet/spreadsheet.js": 100,
-		"./sql/sql": 101,
-		"./sql/sql.js": 101,
-		"./stex/stex": 88,
-		"./stex/stex.js": 88,
-		"./stylus/stylus": 102,
-		"./stylus/stylus.js": 102,
-		"./swift/swift": 103,
-		"./swift/swift.js": 103,
-		"./tcl/tcl": 104,
-		"./tcl/tcl.js": 104,
-		"./textile/textile": 105,
-		"./textile/textile.js": 105,
-		"./tiddlywiki/tiddlywiki": 106,
-		"./tiddlywiki/tiddlywiki.css": 107,
-		"./tiddlywiki/tiddlywiki.js": 106,
-		"./tiki/tiki": 111,
-		"./tiki/tiki.css": 112,
-		"./tiki/tiki.js": 111,
-		"./toml/toml": 114,
-		"./toml/toml.js": 114,
-		"./tornado/tornado": 115,
-		"./tornado/tornado.js": 115,
-		"./troff/troff": 116,
-		"./troff/troff.js": 116,
-		"./ttcn-cfg/ttcn-cfg": 117,
-		"./ttcn-cfg/ttcn-cfg.js": 117,
-		"./ttcn/ttcn": 118,
-		"./ttcn/ttcn.js": 118,
-		"./turtle/turtle": 119,
-		"./turtle/turtle.js": 119,
-		"./twig/twig": 120,
-		"./twig/twig.js": 120,
-		"./vb/vb": 121,
-		"./vb/vb.js": 121,
-		"./vbscript/vbscript": 122,
-		"./vbscript/vbscript.js": 122,
-		"./velocity/velocity": 123,
-		"./velocity/velocity.js": 123,
-		"./verilog/verilog": 124,
-		"./verilog/verilog.js": 124,
-		"./vhdl/vhdl": 125,
-		"./vhdl/vhdl.js": 125,
-		"./vue/vue": 126,
-		"./vue/vue.js": 126,
-		"./xml/xml": 24,
-		"./xml/xml.js": 24,
-		"./xquery/xquery": 127,
-		"./xquery/xquery.js": 127,
-		"./yaml-frontmatter/yaml-frontmatter": 128,
-		"./yaml-frontmatter/yaml-frontmatter.js": 128,
-		"./yaml/yaml": 129,
-		"./yaml/yaml.js": 129,
-		"./z80/z80": 130,
-		"./z80/z80.js": 130
+		"./apl/apl": 7,
+		"./apl/apl.js": 7,
+		"./asciiarmor/asciiarmor": 8,
+		"./asciiarmor/asciiarmor.js": 8,
+		"./asn.1/asn.1": 9,
+		"./asn.1/asn.1.js": 9,
+		"./asterisk/asterisk": 10,
+		"./asterisk/asterisk.js": 10,
+		"./brainfuck/brainfuck": 11,
+		"./brainfuck/brainfuck.js": 11,
+		"./clike/clike": 12,
+		"./clike/clike.js": 12,
+		"./clojure/clojure": 13,
+		"./clojure/clojure.js": 13,
+		"./cmake/cmake": 14,
+		"./cmake/cmake.js": 14,
+		"./cobol/cobol": 15,
+		"./cobol/cobol.js": 15,
+		"./coffeescript/coffeescript": 16,
+		"./coffeescript/coffeescript.js": 16,
+		"./commonlisp/commonlisp": 17,
+		"./commonlisp/commonlisp.js": 17,
+		"./crystal/crystal": 18,
+		"./crystal/crystal.js": 18,
+		"./css/css": 19,
+		"./css/css.js": 19,
+		"./cypher/cypher": 20,
+		"./cypher/cypher.js": 20,
+		"./d/d": 21,
+		"./d/d.js": 21,
+		"./dart/dart": 22,
+		"./dart/dart.js": 22,
+		"./diff/diff": 23,
+		"./diff/diff.js": 23,
+		"./django/django": 24,
+		"./django/django.js": 24,
+		"./dockerfile/dockerfile": 29,
+		"./dockerfile/dockerfile.js": 29,
+		"./dtd/dtd": 31,
+		"./dtd/dtd.js": 31,
+		"./dylan/dylan": 32,
+		"./dylan/dylan.js": 32,
+		"./ebnf/ebnf": 33,
+		"./ebnf/ebnf.js": 33,
+		"./ecl/ecl": 34,
+		"./ecl/ecl.js": 34,
+		"./eiffel/eiffel": 35,
+		"./eiffel/eiffel.js": 35,
+		"./elm/elm": 36,
+		"./elm/elm.js": 36,
+		"./erlang/erlang": 37,
+		"./erlang/erlang.js": 37,
+		"./factor/factor": 38,
+		"./factor/factor.js": 38,
+		"./fcl/fcl": 39,
+		"./fcl/fcl.js": 39,
+		"./forth/forth": 40,
+		"./forth/forth.js": 40,
+		"./fortran/fortran": 41,
+		"./fortran/fortran.js": 41,
+		"./gas/gas": 42,
+		"./gas/gas.js": 42,
+		"./gfm/gfm": 43,
+		"./gfm/gfm.js": 43,
+		"./gherkin/gherkin": 45,
+		"./gherkin/gherkin.js": 45,
+		"./go/go": 46,
+		"./go/go.js": 46,
+		"./groovy/groovy": 47,
+		"./groovy/groovy.js": 47,
+		"./haml/haml": 48,
+		"./haml/haml.js": 48,
+		"./handlebars/handlebars": 50,
+		"./handlebars/handlebars.js": 50,
+		"./haskell-literate/haskell-literate": 52,
+		"./haskell-literate/haskell-literate.js": 52,
+		"./haskell/haskell": 53,
+		"./haskell/haskell.js": 53,
+		"./haxe/haxe": 54,
+		"./haxe/haxe.js": 54,
+		"./htmlembedded/htmlembedded": 55,
+		"./htmlembedded/htmlembedded.js": 55,
+		"./htmlmixed/htmlmixed": 25,
+		"./htmlmixed/htmlmixed.js": 25,
+		"./http/http": 56,
+		"./http/http.js": 56,
+		"./idl/idl": 57,
+		"./idl/idl.js": 57,
+		"./jade/jade": 58,
+		"./jade/jade.js": 58,
+		"./javascript/javascript": 27,
+		"./javascript/javascript.js": 27,
+		"./jinja2/jinja2": 59,
+		"./jinja2/jinja2.js": 59,
+		"./jsx/jsx": 60,
+		"./jsx/jsx.js": 60,
+		"./julia/julia": 61,
+		"./julia/julia.js": 61,
+		"./livescript/livescript": 62,
+		"./livescript/livescript.js": 62,
+		"./lua/lua": 63,
+		"./lua/lua.js": 63,
+		"./markdown/markdown": 44,
+		"./markdown/markdown.js": 44,
+		"./mathematica/mathematica": 64,
+		"./mathematica/mathematica.js": 64,
+		"./meta": 5,
+		"./meta.js": 5,
+		"./mirc/mirc": 65,
+		"./mirc/mirc.js": 65,
+		"./mllike/mllike": 66,
+		"./mllike/mllike.js": 66,
+		"./modelica/modelica": 67,
+		"./modelica/modelica.js": 67,
+		"./mscgen/mscgen": 68,
+		"./mscgen/mscgen.js": 68,
+		"./mumps/mumps": 69,
+		"./mumps/mumps.js": 69,
+		"./nginx/nginx": 70,
+		"./nginx/nginx.js": 70,
+		"./nsis/nsis": 71,
+		"./nsis/nsis.js": 71,
+		"./ntriples/ntriples": 72,
+		"./ntriples/ntriples.js": 72,
+		"./octave/octave": 73,
+		"./octave/octave.js": 73,
+		"./oz/oz": 74,
+		"./oz/oz.js": 74,
+		"./pascal/pascal": 75,
+		"./pascal/pascal.js": 75,
+		"./pegjs/pegjs": 76,
+		"./pegjs/pegjs.js": 76,
+		"./perl/perl": 77,
+		"./perl/perl.js": 77,
+		"./php/php": 78,
+		"./php/php.js": 78,
+		"./pig/pig": 79,
+		"./pig/pig.js": 79,
+		"./properties/properties": 80,
+		"./properties/properties.js": 80,
+		"./protobuf/protobuf": 81,
+		"./protobuf/protobuf.js": 81,
+		"./puppet/puppet": 82,
+		"./puppet/puppet.js": 82,
+		"./python/python": 83,
+		"./python/python.js": 83,
+		"./q/q": 84,
+		"./q/q.js": 84,
+		"./r/r": 85,
+		"./r/r.js": 85,
+		"./rpm/rpm": 87,
+		"./rpm/rpm.js": 87,
+		"./rst/rst": 88,
+		"./rst/rst.js": 88,
+		"./ruby/ruby": 49,
+		"./ruby/ruby.js": 49,
+		"./rust/rust": 90,
+		"./rust/rust.js": 90,
+		"./sass/sass": 91,
+		"./sass/sass.js": 91,
+		"./scheme/scheme": 92,
+		"./scheme/scheme.js": 92,
+		"./shell/shell": 93,
+		"./shell/shell.js": 93,
+		"./sieve/sieve": 94,
+		"./sieve/sieve.js": 94,
+		"./slim/slim": 95,
+		"./slim/slim.js": 95,
+		"./smalltalk/smalltalk": 96,
+		"./smalltalk/smalltalk.js": 96,
+		"./smarty/smarty": 97,
+		"./smarty/smarty.js": 97,
+		"./solr/solr": 98,
+		"./solr/solr.js": 98,
+		"./soy/soy": 99,
+		"./soy/soy.js": 99,
+		"./sparql/sparql": 100,
+		"./sparql/sparql.js": 100,
+		"./spreadsheet/spreadsheet": 101,
+		"./spreadsheet/spreadsheet.js": 101,
+		"./sql/sql": 102,
+		"./sql/sql.js": 102,
+		"./stex/stex": 89,
+		"./stex/stex.js": 89,
+		"./stylus/stylus": 103,
+		"./stylus/stylus.js": 103,
+		"./swift/swift": 104,
+		"./swift/swift.js": 104,
+		"./tcl/tcl": 105,
+		"./tcl/tcl.js": 105,
+		"./textile/textile": 106,
+		"./textile/textile.js": 106,
+		"./tiddlywiki/tiddlywiki": 107,
+		"./tiddlywiki/tiddlywiki.css": 108,
+		"./tiddlywiki/tiddlywiki.js": 107,
+		"./tiki/tiki": 112,
+		"./tiki/tiki.css": 113,
+		"./tiki/tiki.js": 112,
+		"./toml/toml": 115,
+		"./toml/toml.js": 115,
+		"./tornado/tornado": 116,
+		"./tornado/tornado.js": 116,
+		"./troff/troff": 117,
+		"./troff/troff.js": 117,
+		"./ttcn-cfg/ttcn-cfg": 118,
+		"./ttcn-cfg/ttcn-cfg.js": 118,
+		"./ttcn/ttcn": 119,
+		"./ttcn/ttcn.js": 119,
+		"./turtle/turtle": 120,
+		"./turtle/turtle.js": 120,
+		"./twig/twig": 121,
+		"./twig/twig.js": 121,
+		"./vb/vb": 122,
+		"./vb/vb.js": 122,
+		"./vbscript/vbscript": 123,
+		"./vbscript/vbscript.js": 123,
+		"./velocity/velocity": 124,
+		"./velocity/velocity.js": 124,
+		"./verilog/verilog": 125,
+		"./verilog/verilog.js": 125,
+		"./vhdl/vhdl": 126,
+		"./vhdl/vhdl.js": 126,
+		"./vue/vue": 127,
+		"./vue/vue.js": 127,
+		"./xml/xml": 26,
+		"./xml/xml.js": 26,
+		"./xquery/xquery": 128,
+		"./xquery/xquery.js": 128,
+		"./yaml-frontmatter/yaml-frontmatter": 129,
+		"./yaml-frontmatter/yaml-frontmatter.js": 129,
+		"./yaml/yaml": 130,
+		"./yaml/yaml.js": 130,
+		"./z80/z80": 131,
+		"./z80/z80.js": 131
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -9346,11 +9587,11 @@
 	};
 	webpackContext.resolve = webpackContextResolve;
 	module.exports = webpackContext;
-	webpackContext.id = 4;
+	webpackContext.id = 6;
 
 
 /***/ },
-/* 5 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -9530,7 +9771,7 @@
 
 
 /***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -9609,7 +9850,7 @@
 
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -9819,7 +10060,7 @@
 
 
 /***/ },
-/* 8 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -10021,7 +10262,7 @@
 
 
 /***/ },
-/* 9 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -10112,7 +10353,7 @@
 
 
 /***/ },
-/* 10 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -10899,7 +11140,7 @@
 
 
 /***/ },
-/* 11 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -11155,7 +11396,7 @@
 
 
 /***/ },
-/* 12 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -11258,7 +11499,7 @@
 
 
 /***/ },
-/* 13 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -11519,7 +11760,7 @@
 
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -11880,7 +12121,7 @@
 
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -12009,7 +12250,7 @@
 
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -12406,7 +12647,7 @@
 
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -13237,7 +13478,7 @@
 
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -13389,7 +13630,7 @@
 
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -13613,7 +13854,7 @@
 
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -13621,7 +13862,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(10));
+	    mod(__webpack_require__(2), __webpack_require__(12));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../clike/clike"], mod);
 	  else // Plain browser env
@@ -13776,7 +14017,7 @@
 
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -13829,7 +14070,7 @@
 
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -13837,8 +14078,8 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(23),
-	        __webpack_require__(26));
+	    mod(__webpack_require__(2), __webpack_require__(25),
+	        __webpack_require__(28));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../htmlmixed/htmlmixed",
 	            "../../addon/mode/overlay"], mod);
@@ -14191,7 +14432,7 @@
 
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -14199,7 +14440,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(24), __webpack_require__(25), __webpack_require__(17));
+	    mod(__webpack_require__(2), __webpack_require__(26), __webpack_require__(27), __webpack_require__(19));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../xml/xml", "../javascript/javascript", "../css/css"], mod);
 	  else // Plain browser env
@@ -14349,7 +14590,7 @@
 
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -14749,7 +14990,7 @@
 
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -15497,7 +15738,7 @@
 
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -15588,7 +15829,7 @@
 
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -15596,7 +15837,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(28));
+	    mod(__webpack_require__(2), __webpack_require__(30));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../../addon/mode/simple"], mod);
 	  else // Plain browser env
@@ -15673,7 +15914,7 @@
 
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -15892,7 +16133,7 @@
 
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -16040,7 +16281,7 @@
 
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -16390,7 +16631,7 @@
 
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -16591,7 +16832,7 @@
 
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -16803,7 +17044,7 @@
 
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -16969,7 +17210,7 @@
 
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -17180,7 +17421,7 @@
 
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -17804,7 +18045,7 @@
 
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -17816,7 +18057,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(28));
+	    mod(__webpack_require__(2), __webpack_require__(30));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../../addon/mode/simple"], mod);
 	  else // Plain browser env
@@ -17893,7 +18134,7 @@
 
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -18072,7 +18313,7 @@
 
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -18258,7 +18499,7 @@
 
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -18452,7 +18693,7 @@
 
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -18803,7 +19044,7 @@
 
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -18811,7 +19052,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(42), __webpack_require__(26));
+	    mod(__webpack_require__(2), __webpack_require__(44), __webpack_require__(28));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../markdown/markdown", "../../addon/mode/overlay"], mod);
 	  else // Plain browser env
@@ -18939,7 +19180,7 @@
 
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -18947,7 +19188,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(24), __webpack_require__(43));
+	    mod(__webpack_require__(2), __webpack_require__(26), __webpack_require__(5));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../xml/xml", "../meta"], mod);
 	  else // Plain browser env
@@ -19752,216 +19993,7 @@
 
 
 /***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// CodeMirror, copyright (c) by Marijn Haverbeke and others
-	// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-	(function(mod) {
-	  if (true) // CommonJS
-	    mod(__webpack_require__(2));
-	  else if (typeof define == "function" && define.amd) // AMD
-	    define(["../lib/codemirror"], mod);
-	  else // Plain browser env
-	    mod(CodeMirror);
-	})(function(CodeMirror) {
-	  "use strict";
-
-	  CodeMirror.modeInfo = [
-	    {name: "APL", mime: "text/apl", mode: "apl", ext: ["dyalog", "apl"]},
-	    {name: "PGP", mimes: ["application/pgp", "application/pgp-keys", "application/pgp-signature"], mode: "asciiarmor", ext: ["pgp"]},
-	    {name: "ASN.1", mime: "text/x-ttcn-asn", mode: "asn.1", ext: ["asn", "asn1"]},
-	    {name: "Asterisk", mime: "text/x-asterisk", mode: "asterisk", file: /^extensions\.conf$/i},
-	    {name: "Brainfuck", mime: "text/x-brainfuck", mode: "brainfuck", ext: ["b", "bf"]},
-	    {name: "C", mime: "text/x-csrc", mode: "clike", ext: ["c", "h"]},
-	    {name: "C++", mime: "text/x-c++src", mode: "clike", ext: ["cpp", "c++", "cc", "cxx", "hpp", "h++", "hh", "hxx"], alias: ["cpp"]},
-	    {name: "Cobol", mime: "text/x-cobol", mode: "cobol", ext: ["cob", "cpy"]},
-	    {name: "C#", mime: "text/x-csharp", mode: "clike", ext: ["cs"], alias: ["csharp"]},
-	    {name: "Clojure", mime: "text/x-clojure", mode: "clojure", ext: ["clj", "cljc", "cljx"]},
-	    {name: "ClojureScript", mime: "text/x-clojurescript", mode: "clojure", ext: ["cljs"]},
-	    {name: "Closure Stylesheets (GSS)", mime: "text/x-gss", mode: "css", ext: ["gss"]},
-	    {name: "CMake", mime: "text/x-cmake", mode: "cmake", ext: ["cmake", "cmake.in"], file: /^CMakeLists.txt$/},
-	    {name: "CoffeeScript", mime: "text/x-coffeescript", mode: "coffeescript", ext: ["coffee"], alias: ["coffee", "coffee-script"]},
-	    {name: "Common Lisp", mime: "text/x-common-lisp", mode: "commonlisp", ext: ["cl", "lisp", "el"], alias: ["lisp"]},
-	    {name: "Cypher", mime: "application/x-cypher-query", mode: "cypher", ext: ["cyp", "cypher"]},
-	    {name: "Cython", mime: "text/x-cython", mode: "python", ext: ["pyx", "pxd", "pxi"]},
-	    {name: "Crystal", mime: "text/x-crystal", mode: "crystal", ext: ["cr"]},
-	    {name: "CSS", mime: "text/css", mode: "css", ext: ["css"]},
-	    {name: "CQL", mime: "text/x-cassandra", mode: "sql", ext: ["cql"]},
-	    {name: "D", mime: "text/x-d", mode: "d", ext: ["d"]},
-	    {name: "Dart", mimes: ["application/dart", "text/x-dart"], mode: "dart", ext: ["dart"]},
-	    {name: "diff", mime: "text/x-diff", mode: "diff", ext: ["diff", "patch"]},
-	    {name: "Django", mime: "text/x-django", mode: "django"},
-	    {name: "Dockerfile", mime: "text/x-dockerfile", mode: "dockerfile", file: /^Dockerfile$/},
-	    {name: "DTD", mime: "application/xml-dtd", mode: "dtd", ext: ["dtd"]},
-	    {name: "Dylan", mime: "text/x-dylan", mode: "dylan", ext: ["dylan", "dyl", "intr"]},
-	    {name: "EBNF", mime: "text/x-ebnf", mode: "ebnf"},
-	    {name: "ECL", mime: "text/x-ecl", mode: "ecl", ext: ["ecl"]},
-	    {name: "edn", mime: "application/edn", mode: "clojure", ext: ["edn"]},
-	    {name: "Eiffel", mime: "text/x-eiffel", mode: "eiffel", ext: ["e"]},
-	    {name: "Elm", mime: "text/x-elm", mode: "elm", ext: ["elm"]},
-	    {name: "Embedded Javascript", mime: "application/x-ejs", mode: "htmlembedded", ext: ["ejs"]},
-	    {name: "Embedded Ruby", mime: "application/x-erb", mode: "htmlembedded", ext: ["erb"]},
-	    {name: "Erlang", mime: "text/x-erlang", mode: "erlang", ext: ["erl"]},
-	    {name: "Factor", mime: "text/x-factor", mode: "factor", ext: ["factor"]},
-	    {name: "FCL", mime: "text/x-fcl", mode: "fcl"},
-	    {name: "Forth", mime: "text/x-forth", mode: "forth", ext: ["forth", "fth", "4th"]},
-	    {name: "Fortran", mime: "text/x-fortran", mode: "fortran", ext: ["f", "for", "f77", "f90"]},
-	    {name: "F#", mime: "text/x-fsharp", mode: "mllike", ext: ["fs"], alias: ["fsharp"]},
-	    {name: "Gas", mime: "text/x-gas", mode: "gas", ext: ["s"]},
-	    {name: "Gherkin", mime: "text/x-feature", mode: "gherkin", ext: ["feature"]},
-	    {name: "GitHub Flavored Markdown", mime: "text/x-gfm", mode: "gfm", file: /^(readme|contributing|history).md$/i},
-	    {name: "Go", mime: "text/x-go", mode: "go", ext: ["go"]},
-	    {name: "Groovy", mime: "text/x-groovy", mode: "groovy", ext: ["groovy", "gradle"]},
-	    {name: "HAML", mime: "text/x-haml", mode: "haml", ext: ["haml"]},
-	    {name: "Haskell", mime: "text/x-haskell", mode: "haskell", ext: ["hs"]},
-	    {name: "Haskell (Literate)", mime: "text/x-literate-haskell", mode: "haskell-literate", ext: ["lhs"]},
-	    {name: "Haxe", mime: "text/x-haxe", mode: "haxe", ext: ["hx"]},
-	    {name: "HXML", mime: "text/x-hxml", mode: "haxe", ext: ["hxml"]},
-	    {name: "ASP.NET", mime: "application/x-aspx", mode: "htmlembedded", ext: ["aspx"], alias: ["asp", "aspx"]},
-	    {name: "HTML", mime: "text/html", mode: "htmlmixed", ext: ["html", "htm"], alias: ["xhtml"]},
-	    {name: "HTTP", mime: "message/http", mode: "http"},
-	    {name: "IDL", mime: "text/x-idl", mode: "idl", ext: ["pro"]},
-	    {name: "Jade", mime: "text/x-jade", mode: "jade", ext: ["jade"]},
-	    {name: "Java", mime: "text/x-java", mode: "clike", ext: ["java"]},
-	    {name: "Java Server Pages", mime: "application/x-jsp", mode: "htmlembedded", ext: ["jsp"], alias: ["jsp"]},
-	    {name: "JavaScript", mimes: ["text/javascript", "text/ecmascript", "application/javascript", "application/x-javascript", "application/ecmascript"],
-	     mode: "javascript", ext: ["js"], alias: ["ecmascript", "js", "node"]},
-	    {name: "JSON", mimes: ["application/json", "application/x-json"], mode: "javascript", ext: ["json", "map"], alias: ["json5"]},
-	    {name: "JSON-LD", mime: "application/ld+json", mode: "javascript", ext: ["jsonld"], alias: ["jsonld"]},
-	    {name: "JSX", mime: "text/jsx", mode: "jsx", ext: ["jsx"]},
-	    {name: "Jinja2", mime: "null", mode: "jinja2"},
-	    {name: "Julia", mime: "text/x-julia", mode: "julia", ext: ["jl"]},
-	    {name: "Kotlin", mime: "text/x-kotlin", mode: "clike", ext: ["kt"]},
-	    {name: "LESS", mime: "text/x-less", mode: "css", ext: ["less"]},
-	    {name: "LiveScript", mime: "text/x-livescript", mode: "livescript", ext: ["ls"], alias: ["ls"]},
-	    {name: "Lua", mime: "text/x-lua", mode: "lua", ext: ["lua"]},
-	    {name: "Markdown", mime: "text/x-markdown", mode: "markdown", ext: ["markdown", "md", "mkd"]},
-	    {name: "mIRC", mime: "text/mirc", mode: "mirc"},
-	    {name: "MariaDB SQL", mime: "text/x-mariadb", mode: "sql"},
-	    {name: "Mathematica", mime: "text/x-mathematica", mode: "mathematica", ext: ["m", "nb"]},
-	    {name: "Modelica", mime: "text/x-modelica", mode: "modelica", ext: ["mo"]},
-	    {name: "MUMPS", mime: "text/x-mumps", mode: "mumps", ext: ["mps"]},
-	    {name: "MS SQL", mime: "text/x-mssql", mode: "sql"},
-	    {name: "MySQL", mime: "text/x-mysql", mode: "sql"},
-	    {name: "Nginx", mime: "text/x-nginx-conf", mode: "nginx", file: /nginx.*\.conf$/i},
-	    {name: "NSIS", mime: "text/x-nsis", mode: "nsis", ext: ["nsh", "nsi"]},
-	    {name: "NTriples", mime: "text/n-triples", mode: "ntriples", ext: ["nt"]},
-	    {name: "Objective C", mime: "text/x-objectivec", mode: "clike", ext: ["m", "mm"]},
-	    {name: "OCaml", mime: "text/x-ocaml", mode: "mllike", ext: ["ml", "mli", "mll", "mly"]},
-	    {name: "Octave", mime: "text/x-octave", mode: "octave", ext: ["m"]},
-	    {name: "Oz", mime: "text/x-oz", mode: "oz", ext: ["oz"]},
-	    {name: "Pascal", mime: "text/x-pascal", mode: "pascal", ext: ["p", "pas"]},
-	    {name: "PEG.js", mime: "null", mode: "pegjs", ext: ["jsonld"]},
-	    {name: "Perl", mime: "text/x-perl", mode: "perl", ext: ["pl", "pm"]},
-	    {name: "PHP", mime: "application/x-httpd-php", mode: "php", ext: ["php", "php3", "php4", "php5", "phtml"]},
-	    {name: "Pig", mime: "text/x-pig", mode: "pig", ext: ["pig"]},
-	    {name: "Plain Text", mime: "text/plain", mode: "null", ext: ["txt", "text", "conf", "def", "list", "log"]},
-	    {name: "PLSQL", mime: "text/x-plsql", mode: "sql", ext: ["pls"]},
-	    {name: "Properties files", mime: "text/x-properties", mode: "properties", ext: ["properties", "ini", "in"], alias: ["ini", "properties"]},
-	    {name: "ProtoBuf", mime: "text/x-protobuf", mode: "protobuf", ext: ["proto"]},
-	    {name: "Python", mime: "text/x-python", mode: "python", ext: ["py", "pyw"]},
-	    {name: "Puppet", mime: "text/x-puppet", mode: "puppet", ext: ["pp"]},
-	    {name: "Q", mime: "text/x-q", mode: "q", ext: ["q"]},
-	    {name: "R", mime: "text/x-rsrc", mode: "r", ext: ["r"], alias: ["rscript"]},
-	    {name: "reStructuredText", mime: "text/x-rst", mode: "rst", ext: ["rst"], alias: ["rst"]},
-	    {name: "RPM Changes", mime: "text/x-rpm-changes", mode: "rpm"},
-	    {name: "RPM Spec", mime: "text/x-rpm-spec", mode: "rpm", ext: ["spec"]},
-	    {name: "Ruby", mime: "text/x-ruby", mode: "ruby", ext: ["rb"], alias: ["jruby", "macruby", "rake", "rb", "rbx"]},
-	    {name: "Rust", mime: "text/x-rustsrc", mode: "rust", ext: ["rs"]},
-	    {name: "Sass", mime: "text/x-sass", mode: "sass", ext: ["sass"]},
-	    {name: "Scala", mime: "text/x-scala", mode: "clike", ext: ["scala"]},
-	    {name: "Scheme", mime: "text/x-scheme", mode: "scheme", ext: ["scm", "ss"]},
-	    {name: "SCSS", mime: "text/x-scss", mode: "css", ext: ["scss"]},
-	    {name: "Shell", mime: "text/x-sh", mode: "shell", ext: ["sh", "ksh", "bash"], alias: ["bash", "sh", "zsh"], file: /^PKGBUILD$/},
-	    {name: "Sieve", mime: "application/sieve", mode: "sieve", ext: ["siv", "sieve"]},
-	    {name: "Slim", mimes: ["text/x-slim", "application/x-slim"], mode: "slim", ext: ["slim"]},
-	    {name: "Smalltalk", mime: "text/x-stsrc", mode: "smalltalk", ext: ["st"]},
-	    {name: "Smarty", mime: "text/x-smarty", mode: "smarty", ext: ["tpl"]},
-	    {name: "Solr", mime: "text/x-solr", mode: "solr"},
-	    {name: "Soy", mime: "text/x-soy", mode: "soy", ext: ["soy"], alias: ["closure template"]},
-	    {name: "SPARQL", mime: "application/sparql-query", mode: "sparql", ext: ["rq", "sparql"], alias: ["sparul"]},
-	    {name: "Spreadsheet", mime: "text/x-spreadsheet", mode: "spreadsheet", alias: ["excel", "formula"]},
-	    {name: "SQL", mime: "text/x-sql", mode: "sql", ext: ["sql"]},
-	    {name: "Squirrel", mime: "text/x-squirrel", mode: "clike", ext: ["nut"]},
-	    {name: "Swift", mime: "text/x-swift", mode: "swift", ext: ["swift"]},
-	    {name: "sTeX", mime: "text/x-stex", mode: "stex"},
-	    {name: "LaTeX", mime: "text/x-latex", mode: "stex", ext: ["text", "ltx"], alias: ["tex"]},
-	    {name: "SystemVerilog", mime: "text/x-systemverilog", mode: "verilog", ext: ["v"]},
-	    {name: "Tcl", mime: "text/x-tcl", mode: "tcl", ext: ["tcl"]},
-	    {name: "Textile", mime: "text/x-textile", mode: "textile", ext: ["textile"]},
-	    {name: "TiddlyWiki ", mime: "text/x-tiddlywiki", mode: "tiddlywiki"},
-	    {name: "Tiki wiki", mime: "text/tiki", mode: "tiki"},
-	    {name: "TOML", mime: "text/x-toml", mode: "toml", ext: ["toml"]},
-	    {name: "Tornado", mime: "text/x-tornado", mode: "tornado"},
-	    {name: "troff", mime: "text/troff", mode: "troff", ext: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]},
-	    {name: "TTCN", mime: "text/x-ttcn", mode: "ttcn", ext: ["ttcn", "ttcn3", "ttcnpp"]},
-	    {name: "TTCN_CFG", mime: "text/x-ttcn-cfg", mode: "ttcn-cfg", ext: ["cfg"]},
-	    {name: "Turtle", mime: "text/turtle", mode: "turtle", ext: ["ttl"]},
-	    {name: "TypeScript", mime: "application/typescript", mode: "javascript", ext: ["ts"], alias: ["ts"]},
-	    {name: "Twig", mime: "text/x-twig", mode: "twig"},
-	    {name: "VB.NET", mime: "text/x-vb", mode: "vb", ext: ["vb"]},
-	    {name: "VBScript", mime: "text/vbscript", mode: "vbscript", ext: ["vbs"]},
-	    {name: "Velocity", mime: "text/velocity", mode: "velocity", ext: ["vtl"]},
-	    {name: "Verilog", mime: "text/x-verilog", mode: "verilog", ext: ["v"]},
-	    {name: "VHDL", mime: "text/x-vhdl", mode: "vhdl", ext: ["vhd", "vhdl"]},
-	    {name: "XML", mimes: ["application/xml", "text/xml"], mode: "xml", ext: ["xml", "xsl", "xsd"], alias: ["rss", "wsdl", "xsd"]},
-	    {name: "XQuery", mime: "application/xquery", mode: "xquery", ext: ["xy", "xquery"]},
-	    {name: "YAML", mime: "text/x-yaml", mode: "yaml", ext: ["yaml", "yml"], alias: ["yml"]},
-	    {name: "Z80", mime: "text/x-z80", mode: "z80", ext: ["z80"]},
-	    {name: "mscgen", mime: "text/x-mscgen", mode: "mscgen", ext: ["mscgen", "mscin", "msc"]},
-	    {name: "xu", mime: "text/x-xu", mode: "mscgen", ext: ["xu"]},
-	    {name: "msgenny", mime: "text/x-msgenny", mode: "mscgen", ext: ["msgenny"]}
-	  ];
-	  // Ensure all modes have a mime property for backwards compatibility
-	  for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
-	    var info = CodeMirror.modeInfo[i];
-	    if (info.mimes) info.mime = info.mimes[0];
-	  }
-
-	  CodeMirror.findModeByMIME = function(mime) {
-	    mime = mime.toLowerCase();
-	    for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
-	      var info = CodeMirror.modeInfo[i];
-	      if (info.mime == mime) return info;
-	      if (info.mimes) for (var j = 0; j < info.mimes.length; j++)
-	        if (info.mimes[j] == mime) return info;
-	    }
-	  };
-
-	  CodeMirror.findModeByExtension = function(ext) {
-	    for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
-	      var info = CodeMirror.modeInfo[i];
-	      if (info.ext) for (var j = 0; j < info.ext.length; j++)
-	        if (info.ext[j] == ext) return info;
-	    }
-	  };
-
-	  CodeMirror.findModeByFileName = function(filename) {
-	    for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
-	      var info = CodeMirror.modeInfo[i];
-	      if (info.file && info.file.test(filename)) return info;
-	    }
-	    var dot = filename.lastIndexOf(".");
-	    var ext = dot > -1 && filename.substring(dot + 1, filename.length);
-	    if (ext) return CodeMirror.findModeByExtension(ext);
-	  };
-
-	  CodeMirror.findModeByName = function(name) {
-	    name = name.toLowerCase();
-	    for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
-	      var info = CodeMirror.modeInfo[i];
-	      if (info.name.toLowerCase() == name) return info;
-	      if (info.alias) for (var j = 0; j < info.alias.length; j++)
-	        if (info.alias[j].toLowerCase() == name) return info;
-	    }
-	  };
-	});
-
-
-/***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -20145,7 +20177,7 @@
 
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -20336,7 +20368,7 @@
 
 
 /***/ },
-/* 46 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -20572,7 +20604,7 @@
 
 
 /***/ },
-/* 47 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -20580,7 +20612,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(23), __webpack_require__(48));
+	    mod(__webpack_require__(2), __webpack_require__(25), __webpack_require__(49));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../htmlmixed/htmlmixed", "../ruby/ruby"], mod);
 	  else // Plain browser env
@@ -20739,7 +20771,7 @@
 
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -21030,7 +21062,7 @@
 
 
 /***/ },
-/* 49 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -21038,7 +21070,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(28), __webpack_require__(50));
+	    mod(__webpack_require__(2), __webpack_require__(30), __webpack_require__(51));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../../addon/mode/simple", "../../addon/mode/multiplex"], mod);
 	  else // Plain browser env
@@ -21098,7 +21130,7 @@
 
 
 /***/ },
-/* 50 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -21227,7 +21259,7 @@
 
 
 /***/ },
-/* 51 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -21235,7 +21267,7 @@
 
 	(function (mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(52))
+	    mod(__webpack_require__(2), __webpack_require__(53))
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../haskell/haskell"], mod)
 	  else // Plain browser env
@@ -21276,7 +21308,7 @@
 
 
 /***/ },
-/* 52 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -21549,7 +21581,7 @@
 
 
 /***/ },
-/* 53 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -22070,7 +22102,7 @@
 
 
 /***/ },
-/* 54 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -22078,8 +22110,8 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(23),
-	        __webpack_require__(50));
+	    mod(__webpack_require__(2), __webpack_require__(25),
+	        __webpack_require__(51));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../htmlmixed/htmlmixed",
 	            "../../addon/mode/multiplex"], mod);
@@ -22104,7 +22136,7 @@
 
 
 /***/ },
-/* 55 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -22223,7 +22255,7 @@
 
 
 /***/ },
-/* 56 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -22519,7 +22551,7 @@
 
 
 /***/ },
-/* 57 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -22527,7 +22559,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(25), __webpack_require__(17), __webpack_require__(23));
+	    mod(__webpack_require__(2), __webpack_require__(27), __webpack_require__(19), __webpack_require__(25));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../javascript/javascript", "../css/css", "../htmlmixed/htmlmixed"], mod);
 	  else // Plain browser env
@@ -23115,7 +23147,7 @@
 
 
 /***/ },
-/* 58 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -23263,7 +23295,7 @@
 
 
 /***/ },
-/* 59 */
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -23271,7 +23303,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(24), __webpack_require__(25))
+	    mod(__webpack_require__(2), __webpack_require__(26), __webpack_require__(27))
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../xml/xml", "../javascript/javascript"], mod)
 	  else // Plain browser env
@@ -23416,7 +23448,7 @@
 
 
 /***/ },
-/* 60 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -23814,7 +23846,7 @@
 
 
 /***/ },
-/* 61 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -24100,7 +24132,7 @@
 
 
 /***/ },
-/* 62 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -24265,7 +24297,7 @@
 
 
 /***/ },
-/* 63 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -24446,7 +24478,7 @@
 
 
 /***/ },
-/* 64 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -24645,7 +24677,7 @@
 
 
 /***/ },
-/* 65 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -24856,7 +24888,7 @@
 
 
 /***/ },
-/* 66 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -25107,7 +25139,7 @@
 
 
 /***/ },
-/* 67 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -25282,7 +25314,7 @@
 
 
 /***/ },
-/* 68 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -25436,7 +25468,7 @@
 
 
 /***/ },
-/* 69 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -25620,7 +25652,7 @@
 
 
 /***/ },
-/* 70 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -25630,7 +25662,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(28));
+	    mod(__webpack_require__(2), __webpack_require__(30));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../../addon/mode/simple"], mod);
 	  else // Plain browser env
@@ -25721,7 +25753,7 @@
 
 
 /***/ },
-/* 71 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -25913,7 +25945,7 @@
 
 
 /***/ },
-/* 72 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -26054,7 +26086,7 @@
 
 
 /***/ },
-/* 73 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -26312,7 +26344,7 @@
 
 
 /***/ },
-/* 74 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -26427,7 +26459,7 @@
 
 
 /***/ },
-/* 75 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -26435,7 +26467,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(25));
+	    mod(__webpack_require__(2), __webpack_require__(27));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../javascript/javascript"], mod);
 	  else // Plain browser env
@@ -26547,7 +26579,7 @@
 
 
 /***/ },
-/* 76 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -27390,7 +27422,7 @@
 
 
 /***/ },
-/* 77 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -27398,7 +27430,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(23), __webpack_require__(10));
+	    mod(__webpack_require__(2), __webpack_require__(25), __webpack_require__(12));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../htmlmixed/htmlmixed", "../clike/clike"], mod);
 	  else // Plain browser env
@@ -27630,7 +27662,7 @@
 
 
 /***/ },
-/* 78 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -27814,7 +27846,7 @@
 
 
 /***/ },
-/* 79 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -27898,7 +27930,7 @@
 
 
 /***/ },
-/* 80 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -27972,7 +28004,7 @@
 
 
 /***/ },
-/* 81 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -28198,7 +28230,7 @@
 
 
 /***/ },
-/* 82 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -28552,7 +28584,7 @@
 
 
 /***/ },
-/* 83 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -28697,7 +28729,7 @@
 
 
 /***/ },
-/* 84 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -28867,8 +28899,8 @@
 
 
 /***/ },
-/* 85 */,
-/* 86 */
+/* 86 */,
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -28983,7 +29015,7 @@
 
 
 /***/ },
-/* 87 */
+/* 88 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -28991,7 +29023,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(82), __webpack_require__(88), __webpack_require__(26));
+	    mod(__webpack_require__(2), __webpack_require__(83), __webpack_require__(89), __webpack_require__(28));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../python/python", "../stex/stex", "../../addon/mode/overlay"], mod);
 	  else // Plain browser env
@@ -29546,7 +29578,7 @@
 
 
 /***/ },
-/* 88 */
+/* 89 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -29803,7 +29835,7 @@
 
 
 /***/ },
-/* 89 */
+/* 90 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -29811,7 +29843,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(28));
+	    mod(__webpack_require__(2), __webpack_require__(30));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../../addon/mode/simple"], mod);
 	  else // Plain browser env
@@ -29880,7 +29912,7 @@
 
 
 /***/ },
-/* 90 */
+/* 91 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -30300,7 +30332,7 @@
 
 
 /***/ },
-/* 91 */
+/* 92 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -30555,7 +30587,7 @@
 
 
 /***/ },
-/* 92 */
+/* 93 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -30700,7 +30732,7 @@
 
 
 /***/ },
-/* 93 */
+/* 94 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -30899,7 +30931,7 @@
 
 
 /***/ },
-/* 94 */
+/* 95 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -30909,7 +30941,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(23), __webpack_require__(48));
+	    mod(__webpack_require__(2), __webpack_require__(25), __webpack_require__(49));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../htmlmixed/htmlmixed", "../ruby/ruby"], mod);
 	  else // Plain browser env
@@ -31480,7 +31512,7 @@
 
 
 /***/ },
-/* 95 */
+/* 96 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -31654,7 +31686,7 @@
 
 
 /***/ },
-/* 96 */
+/* 97 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -31885,7 +31917,7 @@
 
 
 /***/ },
-/* 97 */
+/* 98 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -31995,7 +32027,7 @@
 
 
 /***/ },
-/* 98 */
+/* 99 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -32003,7 +32035,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(23));
+	    mod(__webpack_require__(2), __webpack_require__(25));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../htmlmixed/htmlmixed"], mod);
 	  else // Plain browser env
@@ -32199,7 +32231,7 @@
 
 
 /***/ },
-/* 99 */
+/* 100 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -32385,7 +32417,7 @@
 
 
 /***/ },
-/* 100 */
+/* 101 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -32503,7 +32535,7 @@
 
 
 /***/ },
-/* 101 */
+/* 102 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -32914,7 +32946,7 @@
 
 
 /***/ },
-/* 102 */
+/* 103 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -33689,7 +33721,7 @@
 
 
 /***/ },
-/* 103 */
+/* 104 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -33897,7 +33929,7 @@
 
 
 /***/ },
-/* 104 */
+/* 105 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -34042,7 +34074,7 @@
 
 
 /***/ },
-/* 105 */
+/* 106 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -34517,7 +34549,7 @@
 
 
 /***/ },
-/* 106 */
+/* 107 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -34881,16 +34913,16 @@
 
 
 /***/ },
-/* 107 */
+/* 108 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(108);
+	var content = __webpack_require__(109);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(110)(content, {});
+	var update = __webpack_require__(111)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -34907,10 +34939,10 @@
 	}
 
 /***/ },
-/* 108 */
+/* 109 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(109)();
+	exports = module.exports = __webpack_require__(110)();
 	// imports
 
 
@@ -34921,7 +34953,7 @@
 
 
 /***/ },
-/* 109 */
+/* 110 */
 /***/ function(module, exports) {
 
 	/*
@@ -34977,7 +35009,7 @@
 
 
 /***/ },
-/* 110 */
+/* 111 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -35229,7 +35261,7 @@
 
 
 /***/ },
-/* 111 */
+/* 112 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -35547,16 +35579,16 @@
 
 
 /***/ },
-/* 112 */
+/* 113 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(113);
+	var content = __webpack_require__(114);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(110)(content, {});
+	var update = __webpack_require__(111)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -35573,10 +35605,10 @@
 	}
 
 /***/ },
-/* 113 */
+/* 114 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(109)();
+	exports = module.exports = __webpack_require__(110)();
 	// imports
 
 
@@ -35587,7 +35619,7 @@
 
 
 /***/ },
-/* 114 */
+/* 115 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -35681,7 +35713,7 @@
 
 
 /***/ },
-/* 115 */
+/* 116 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -35689,8 +35721,8 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(23),
-	        __webpack_require__(26));
+	    mod(__webpack_require__(2), __webpack_require__(25),
+	        __webpack_require__(28));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../htmlmixed/htmlmixed",
 	            "../../addon/mode/overlay"], mod);
@@ -35755,7 +35787,7 @@
 
 
 /***/ },
-/* 116 */
+/* 117 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -35845,7 +35877,7 @@
 
 
 /***/ },
-/* 117 */
+/* 118 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -36064,7 +36096,7 @@
 	});
 
 /***/ },
-/* 118 */
+/* 119 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -36353,7 +36385,7 @@
 
 
 /***/ },
-/* 119 */
+/* 120 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -36521,7 +36553,7 @@
 
 
 /***/ },
-/* 120 */
+/* 121 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -36529,7 +36561,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2),  __webpack_require__(50));
+	    mod(__webpack_require__(2),  __webpack_require__(51));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../../addon/mode/multiplex"], mod);
 	  else // Plain browser env
@@ -36668,7 +36700,7 @@
 
 
 /***/ },
-/* 121 */
+/* 122 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -36950,7 +36982,7 @@
 
 
 /***/ },
-/* 122 */
+/* 123 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -37306,7 +37338,7 @@
 
 
 /***/ },
-/* 123 */
+/* 124 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -37513,7 +37545,7 @@
 
 
 /***/ },
-/* 124 */
+/* 125 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -38056,7 +38088,7 @@
 
 
 /***/ },
-/* 125 */
+/* 126 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -38251,7 +38283,7 @@
 
 
 /***/ },
-/* 126 */
+/* 127 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -38261,15 +38293,15 @@
 	  "use strict";
 	  if (true) {// CommonJS
 	    mod(__webpack_require__(2),
+	        __webpack_require__(28),
 	        __webpack_require__(26),
-	        __webpack_require__(24),
-	        __webpack_require__(25),
-	        __webpack_require__(14),
-	        __webpack_require__(17),
-	        __webpack_require__(90),
-	        __webpack_require__(102),
-	        __webpack_require__(57),
-	        __webpack_require__(49));
+	        __webpack_require__(27),
+	        __webpack_require__(16),
+	        __webpack_require__(19),
+	        __webpack_require__(91),
+	        __webpack_require__(103),
+	        __webpack_require__(58),
+	        __webpack_require__(50));
 	  } else if (typeof define === "function" && define.amd) { // AMD
 	    define(["../../lib/codemirror",
 	            "../../addon/mode/overlay",
@@ -38326,7 +38358,7 @@
 
 
 /***/ },
-/* 127 */
+/* 128 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -38769,7 +38801,7 @@
 
 
 /***/ },
-/* 128 */
+/* 129 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -38777,7 +38809,7 @@
 
 	(function (mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(2), __webpack_require__(129))
+	    mod(__webpack_require__(2), __webpack_require__(130))
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../yaml/yaml"], mod)
 	  else // Plain browser env
@@ -38843,7 +38875,7 @@
 
 
 /***/ },
-/* 129 */
+/* 130 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -38966,7 +38998,7 @@
 
 
 /***/ },
-/* 130 */
+/* 131 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -39088,47 +39120,58 @@
 
 
 /***/ },
-/* 131 */
-/***/ function(module, exports) {
+/* 132 */
+/***/ function(module, exports, __webpack_require__) {
 
-	/* eslint-disable no-unused-vars */
-	'use strict';
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
-	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+	var CodeMirror = __webpack_require__(2);
+	__webpack_require__(5);
+	__webpack_require__(3);
 
-	function toObject(val) {
-		if (val === null || val === undefined) {
-			throw new TypeError('Object.assign cannot be called with null or undefined');
-		}
+	CodeMirror.modeInfo.forEach(function(modeInfo) {
+	  var language = modeInfo.mode;
+	  if (language && "null" !== language) {
+	    __webpack_require__(6)("./" + language + "/" + language);
+	  }
+	});
 
-		return Object(val);
-	}
 
-	module.exports = Object.assign || function (target, source) {
-		var from;
-		var to = toObject(target);
-		var symbols;
+	module.exports = {
+	  getSortedPossibleLanguagesArray: function(valueString) {
+	    var analysisResultsArray = [];
+	    var sortedPossibleLanguages = [];
 
-		for (var s = 1; s < arguments.length; s++) {
-			from = Object(arguments[s]);
+	    CodeMirror.modeInfo.forEach(function(modeInfo) {
+	      var language = modeInfo.mode;
+	      var analysisResults = {
+	        language: language,
+	        numberOfValidTokens: 0,
+	        numberOfErrors: 0
+	      };
 
-			for (var key in from) {
-				if (hasOwnProperty.call(from, key)) {
-					to[key] = from[key];
-				}
-			}
+	      if (language && "null" !== language) {
+	        CodeMirror.runMode(valueString, language, function(currentString, style){
+	          if (style) {
+	            if (-1 !== style.indexOf("error")) {
+	              analysisResults.numberOfErrors++;
+	            } else if (currentString) {
+	              analysisResults.numberOfValidTokens++;
+	            }
+	          }
+	          console.log("language=", language, "currentString", currentString, " style=", style);
+	        });
+	        analysisResultsArray.push(analysisResults);
 
-			if (Object.getOwnPropertySymbols) {
-				symbols = Object.getOwnPropertySymbols(from);
-				for (var i = 0; i < symbols.length; i++) {
-					if (propIsEnumerable.call(from, symbols[i])) {
-						to[symbols[i]] = from[symbols[i]];
-					}
-				}
-			}
-		}
+	        console.log("language", analysisResults);
+	      }
+	    });
 
-		return to;
+	    sortedPossibleLanguages = analysisResultsArray.filter(function(analysisResults) {
+	      return analysisResults.numberOfValidTokens &&
+	              !analysisResults.numberOfErrors;
+	    });
+
+	    return sortedPossibleLanguages;
+	  }
 	};
 
 
