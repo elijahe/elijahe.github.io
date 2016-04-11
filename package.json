@@ -7,7 +7,7 @@
     "build": "npm run copy-css && webpack",
     "copy-css": "cp node_modules/codemirror/lib/codemirror.css src/whatlang/.",
     "start": "webpack-dev-server --progress --colors",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "webpack-dev-server --config webpack.tests.config.js"
   },
   "repository": {
     "type": "git",
@@ -20,7 +20,10 @@
   },
   "homepage": "https://github.com/elijahe/elijahe.github.io#readme",
   "devDependencies": {
+    "chai": "^3.5.0",
     "css-loader": "^0.23.1",
+    "mocha": "^2.4.5",
+    "mocha-loader": "^0.7.1",
     "style-loader": "^0.13.1",
     "webpack": "^1.12.14",
     "webpack-dev-server": "^1.14.1"
