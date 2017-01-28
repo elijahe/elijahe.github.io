@@ -1,14 +1,7 @@
 var CodeMirror = require("codemirror");
+require("codemirror/lib/codemirror.css");
 
 var LanguageDetector = require("./language_detector");
-
-CodeMirror.modeInfo.forEach(function(modeInfo) {
-  var language = modeInfo.mode;
-  if (language && "null" !== language) {
-    require("codemirror/mode/" + language + "/" + language);
-  }
-});
-
 var objectAssign = require('object-assign');
 
 function WhatLang(options) {

@@ -3,9 +3,9 @@ require("codemirror/mode/meta");
 require("codemirror/addon/runmode/runmode");
 
 CodeMirror.modeInfo.forEach(function(modeInfo) {
-  var language = modeInfo.mode;
-  if (language && "null" !== language) {
-    require("codemirror/mode/" + language + "/" + language);
+  var mode = modeInfo.mode;
+  if (mode && "null" !== mode) {
+    require("codemirror/mode/" + mode + "/" + mode + ".js");
   }
 });
 
@@ -16,33 +16,32 @@ module.exports = {
     var sortedPossibleLanguages = [];
 
     CodeMirror.modeInfo.forEach(function(modeInfo) {
-      var language = modeInfo.mode;
+      var mode = modeInfo.mode;
       var analysisResults = {
-        language: language,
+        mode: mode,
+        name: modeInfo.name,
         numberOfValidTokens: 0,
         numberOfErrors: 0
       };
 
-      if (language && "null" !== language) {
-        CodeMirror.runMode(valueString, language, function(currentString, style){
-          if (style) {
-            if (-1 !== style.indexOf("error")) {
-              analysisResults.numberOfErrors++;
-            } else if (currentString) {
-              analysisResults.numberOfValidTokens++;
-            }
+      CodeMirror.runMode(valueString, mode, function(currentString, style){
+        if (style) {
+          if (-1 !== style.indexOf("error")) {
+            analysisResults.numberOfErrors++;
+          } else if (currentString && currentString.length > 1) {
+            analysisResults.numberOfValidTokens++;
           }
-          console.log("language=", language, "currentString", currentString, " style=", style);
-        });
-        analysisResultsArray.push(analysisResults);
+        }
+      });
 
-        console.log("language", analysisResults);
+      if (analysisResults.numberOfErrors > 0 || analysisResults.numberOfValidTokens > 0) {
+        analysisResultsArray.push(analysisResults);
       }
     });
 
-    sortedPossibleLanguages = analysisResultsArray.filter(function(analysisResults) {
-      return analysisResults.numberOfValidTokens &&
-              !analysisResults.numberOfErrors;
+    sortedPossibleLanguages = analysisResultsArray.sort(function(a, b) {
+      return b.numberOfValidTokens - a.numberOfValidTokens +
+              a.numberOfErrors - b.numberOfErrors;
     });
 
     return sortedPossibleLanguages;
